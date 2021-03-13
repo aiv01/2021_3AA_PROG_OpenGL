@@ -1,0 +1,35 @@
+cmake_minimum_required(VERSION 3.18)
+project(CMakeOpenGL)
+set(CMAKE_CXX_STANDARD 17)
+
+# Download automatically, you can also just copy the conan.cmake file
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+   file(DOWNLOAD "https://github.com/conan-io/cmake-conan/raw/v0.15/conan.cmake"
+                 "${CMAKE_BINARY_DIR}/conan.cmake" 
+                 TLS_VERIFY ON)
+endif()
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+
+conan_cmake_run(CONANFILE conanfile.txt
+                BASIC_SETUP CMAKE_TARGETS
+                BUILD missing)
+
+set(EXEC_PRJ AppPrj)
+file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE HEADERS ${CMAKE_SOURCE_DIR}/src/*.h ${CMAKE_SOURCE_DIR}/include/*.h)
+
+add_executable(${EXEC_PRJ} ${HEADERS} ${SOURCES})
+target_include_directories(${EXEC_PRJ} PRIVATE include src)
+
+#Library linking and Headers import 
+#Futhermore copy dlls next to the executable
+conan_target_link_libraries(${EXEC_PRJ})
+
+# Post build: Copy Resources to bin
+set(ResourcesPath ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+add_custom_command(TARGET ${EXEC_PRJ} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan "Copy Resources..."
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${ResourcesPath} $<TARGET_FILE_DIR:${EXEC_PRJ}>/resources
+)
+
