@@ -12,6 +12,7 @@ class Window
         bool isOpened();
         float getDeltaTime();
         void setTitle(const std::string title);
+        void printGLInfo();
 
     private:
         float m_deltaTime;

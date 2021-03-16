@@ -1,4 +1,4 @@
-#include <window.h>
+#include "Window.h"
 #include <iostream>
 
 // #ifdef _WIN32
@@ -14,6 +14,8 @@ int main()
 	Window *window = new Window(640, 480, "OpenGLTest");
 	float updateTime = 0.f;
 	char title[50];
+
+	window->printGLInfo();
 
 	while (window->isOpened())
 	{
