@@ -1,5 +1,4 @@
 #include "Window.h"
-#include <stdexcept>
 #include "Commons.h"
 
 
