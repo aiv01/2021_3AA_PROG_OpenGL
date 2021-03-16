@@ -27,4 +27,4 @@ Here a possibile workaround:
 1. Delete *configurationProvider* from ```settings.json``` and/or from ```c_cpp_properties.json```
 1. Add to C/C++ Plugin include path, the repo where cmake/conan install dependencies the include path:
     * on Windows: ```~/.conan/data/**```
-    * also add: ```${workspaceFolder}/include``` (because is no more used to setup the c++ plugin)
+    * also add: ```${workspaceFolder}/include``` (because is cmake is no more used to setup the c++ plugin)
