@@ -3,6 +3,7 @@
 #include "TriangleDraw.h"
 #include "QuadDraw.h"
 #include "QuadIndexDraw.h"
+#include "QuadColorDraw.h"
 
 // #ifdef _WIN32
 // extern "C" {
@@ -22,7 +23,8 @@ int main()
 
 	//TriangleDraw currentDraw;
 	//QuadDraw currentDraw;
-	QuadIndexDraw currentDraw;
+	//QuadIndexDraw currentDraw;
+	QuadColorDraw currentDraw;
 
 	currentDraw.start();
 	while (window->isOpened())
@@ -37,7 +39,7 @@ int main()
 			window->setTitle(title);
 		}
 
-		currentDraw.update();
+		currentDraw.update(window->getDeltaTime());
 
 		window->update();
 	}
