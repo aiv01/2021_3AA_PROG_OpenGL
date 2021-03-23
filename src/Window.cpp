@@ -2,7 +2,7 @@
 #include "Commons.h"
 
 
-Window::Window(int width, int height, const std::string title, bool fullScreen)
+Window::Window(int width, int height, const std::string& title, bool fullScreen)
 {
 	DIE_ON_ERROR(glfwInit(), "Error Init GLFW \n");
 
@@ -51,7 +51,7 @@ float Window::getDeltaTime()
     return m_deltaTime;
 }
 
-void Window::setTitle(const std::string title)
+void Window::setTitle(const std::string& title)
 {
     glfwSetWindowTitle(m_window, title.c_str());
 }

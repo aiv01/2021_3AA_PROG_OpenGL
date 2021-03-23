@@ -6,12 +6,12 @@
 class Window
 {
     public:
-        Window(int width, int height, const std::string title, bool fullScreen = false);
+        Window(int width, int height, const std::string& title, bool fullScreen = false);
         ~Window();
         void update();
         bool isOpened();
         float getDeltaTime();
-        void setTitle(const std::string title);
+        void setTitle(const std::string& title);
         void printGLInfo();
 
     private:
