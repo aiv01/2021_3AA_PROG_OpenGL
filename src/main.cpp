@@ -1,6 +1,7 @@
 #include "Window.h"
 #include <iostream>
 #include "TriangleDraw.h"
+#include "QuadDraw.h"
 
 // #ifdef _WIN32
 // extern "C" {
@@ -18,9 +19,10 @@ int main()
 
 	window->printGLInfo();
 
-	TriangleDraw triangle;
+	//TriangleDraw currentDraw;
+	QuadDraw currentDraw;
 
-	triangle.start();
+	currentDraw.start();
 	while (window->isOpened())
 	{
 		int fps = (int)(1.f / window->getDeltaTime());
@@ -33,12 +35,12 @@ int main()
 			window->setTitle(title);
 		}
 
-		triangle.update();
+		currentDraw.update();
 
 		window->update();
 	}
 
-	triangle.destroy();
+	currentDraw.destroy();
 	delete window;
 	return 0;
 }
