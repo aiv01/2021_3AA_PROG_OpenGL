@@ -125,5 +125,6 @@ void QuadIndexDraw::update() {
 void QuadIndexDraw::destroy() {
     glDeleteVertexArrays(1, &m_vao);
     glDeleteBuffers(1, &m_vbo);
+    glDeleteBuffers(1, &m_ebo);
     glDeleteProgram(m_prog);
 }
