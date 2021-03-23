@@ -5,7 +5,6 @@
 #include "Commons.h"
 #include <filesystem>
 #include <iostream>
-#include <glad/glad.h>
 
 static std::vector<char> readFile(const std::string& filePath) {
     //std::cout << std::filesystem::current_path() << std::endl;
@@ -64,13 +63,44 @@ void TriangleDraw::start() {
     //2. Create Fragment Shader
     GLuint fragShader = createShader("resources/shaders/triangle.frag", GL_FRAGMENT_SHADER);
     //3. Create Program and bind Vertex/Fragm Shader (Pipeline definition)
-    GLuint progId = createProgram(vertShader, fragShader);
+    m_prog = createProgram(vertShader, fragShader);
 
     //4. Load Vertex data to GPU
+    std::vector<float> vertices = {
+         0.5f, -0.5f, 0.0f,   //bottom right
+        -0.5f, -0.5f, 0.0f,   //bottom left
+         0.0f,  0.5f, 0.0f,   //top
+    };
+
+    //- Create Vertex Array (VAO)
+    glGenVertexArrays(1, &m_vao);
+    glBindVertexArray(m_vao);
+
+    //- Create Buffer to load data (VBO)
+    glGenBuffers(1, &m_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    int dataSize = vertices.size() * sizeof(float);
+    glBufferData(GL_ARRAY_BUFFER, dataSize, vertices.data(), GL_STATIC_DRAW);
+
+    //- VAO link VBO to Vertex Shader
+    GLuint location_0 = 0;
+    glVertexAttribPointer(location_0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glEnableVertexAttribArray(location_0);
 
     //5. Set Viewport
+    glViewport(0, 0, 640, 480);
+    glClearColor(0.5f, 0.5f, 0.5f, 1.f);
+    glUseProgram(m_prog);
 }
 
 void TriangleDraw::update() {
     //6. Draw Call
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+void TriangleDraw::destroy() {
+    glDeleteVertexArrays(1, &m_vao);
+    glDeleteBuffers(1, &m_vbo);
+    glDeleteProgram(m_prog);
 }

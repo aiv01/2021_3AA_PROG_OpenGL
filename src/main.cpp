@@ -38,6 +38,7 @@ int main()
 		window->update();
 	}
 
+	triangle.destroy();
 	delete window;
 	return 0;
 }
