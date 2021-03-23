@@ -1,5 +1,6 @@
 #include "Window.h"
 #include <iostream>
+#include "TriangleDraw.h"
 
 // #ifdef _WIN32
 // extern "C" {
@@ -17,6 +18,9 @@ int main()
 
 	window->printGLInfo();
 
+	TriangleDraw triangle;
+
+	triangle.start();
 	while (window->isOpened())
 	{
 		int fps = (int)(1.f / window->getDeltaTime());
@@ -28,6 +32,8 @@ int main()
 			sprintf_s(title, sizeof(title), "Delta Time: %f - Fps: %d", window->getDeltaTime(), fps);
 			window->setTitle(title);
 		}
+
+		triangle.update();
 
 		window->update();
 	}
