@@ -2,6 +2,7 @@
 #include <iostream>
 #include "TriangleDraw.h"
 #include "QuadDraw.h"
+#include "QuadIndexDraw.h"
 
 // #ifdef _WIN32
 // extern "C" {
@@ -20,7 +21,8 @@ int main()
 	window->printGLInfo();
 
 	//TriangleDraw currentDraw;
-	QuadDraw currentDraw;
+	//QuadDraw currentDraw;
+	QuadIndexDraw currentDraw;
 
 	currentDraw.start();
 	while (window->isOpened())
