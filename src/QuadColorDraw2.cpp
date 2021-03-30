@@ -66,9 +66,9 @@ struct color {
 
 void QuadColorDraw2::start() {
     //1. Create Vertex Shader
-    GLuint vertShader = createShader("resources/shaders/quadcolor.vert", GL_VERTEX_SHADER);
+    GLuint vertShader = createShader("resources/shaders/quadcolor2.vert", GL_VERTEX_SHADER);
     //2. Create Fragment Shader
-    GLuint fragShader = createShader("resources/shaders/quadcolor.frag", GL_FRAGMENT_SHADER);
+    GLuint fragShader = createShader("resources/shaders/quadcolor2.frag", GL_FRAGMENT_SHADER);
     //3. Create Program and bind Vertex/Fragm Shader (Pipeline definition)
     m_prog = createProgram(vertShader, fragShader);
 
@@ -153,7 +153,15 @@ void QuadColorDraw2::update(float deltaTime) {
     c.b = cosf(m_elapsedTime + 1.1f) * 0.5f + 0.5f;
     c.a = 1.f;
 
-    glUniform4fv(glGetUniformLocation(m_prog, "color"), 1, (GLfloat*)&c);
+    //glUniform4fv(glGetUniformLocation(m_prog, "color"), 1, (GLfloat*)&c);
+    glUniform4fv(5, 1, (GLfloat*)&c);
+
+
+    glUniform1f(glGetUniformLocation(m_prog, "data.value1"), 1.f);
+    glUniform1f(glGetUniformLocation(m_prog, "data.value2"), 1.f);
+    glUniform1f(glGetUniformLocation(m_prog, "data.value3"), 1.f);
+
+    printf("Location: %d\n", glGetUniformLocation(m_prog, "data.value3"));
 }
 
 void QuadColorDraw2::destroy() {
