@@ -18,6 +18,8 @@ public:
     GLuint getId() const;
     void bind() const;
     void setUniform(const std::string& name, const color& c);
+    void setUniform(const std::string& name, bool value);
+    void setUniform(const std::string& name, int value);
 
     ~GLProgram();
 

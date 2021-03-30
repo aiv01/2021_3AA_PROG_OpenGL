@@ -5,6 +5,7 @@
 #include "QuadIndexDraw.h"
 #include "QuadColorDraw.h"
 #include "QuadColorDraw2.h"
+#include "QuadTexturedDraw.h"
 
 // #ifdef _WIN32
 // extern "C" {
@@ -26,7 +27,8 @@ int main()
 	//QuadDraw currentDraw;
 	//QuadIndexDraw currentDraw;
 	// QuadColorDraw currentDraw;
-	QuadColorDraw2 currentDraw;
+	//QuadColorDraw2 currentDraw;
+	QuadTexturedDraw currentDraw;
 
 	currentDraw.start();
 	while (window->isOpened())
