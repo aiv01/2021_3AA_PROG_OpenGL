@@ -1,76 +1,15 @@
 #include "QuadColorDraw2.h"
+#include "Commons.h"
 #include <vector>
 #include <string>
 #include <fstream>
-#include "Commons.h"
 #include <filesystem>
 #include <iostream>
 
-static std::vector<char> readFile(const std::string& filePath) {
-    //std::cout << std::filesystem::current_path() << std::endl;
-    std::ifstream file(filePath, std::ios::ate);
-    if (!file.is_open()) DIE("failed opening file!!!");
-    
-    size_t fileSize = (size_t)file.tellg();
-    std::vector<char> buffer(fileSize);
 
-    file.seekg(0);
-    file.read(buffer.data(), fileSize);
-    file.close();
-    return buffer;
-}
-
-static GLuint createShader(const std::string& filePath, GLenum shaderType) {
-    std::vector<char> shaderStr = readFile(filePath);
-    const char* shaderSource = shaderStr.data();
-
-    GLuint shaderId = glCreateShader(shaderType);
-    glShaderSource(shaderId, 1, &shaderSource, NULL);
-    glCompileShader(shaderId);
-
-    int success;
-    char infoLog[512];
-    glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
-        DIE(infoLog);
-    }
-    return shaderId;
-}
-
-static GLuint createProgram(GLuint vertId, GLuint fragId) {
-    GLuint programId = glCreateProgram();
-    glAttachShader(programId, vertId);
-    glAttachShader(programId, fragId);
-    glLinkProgram(programId);
-
-    int success;
-    char infoLog[512];
-    glGetProgramiv(programId, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(programId, 512, NULL, infoLog);
-        DIE(infoLog);
-    }
-
-    glDeleteShader(vertId);
-    glDeleteShader(fragId);
-    return programId;
-}
-
-struct color {
-    float r;
-    float g;
-    float b;
-    float a;
-};
 
 void QuadColorDraw2::start() {
-    //1. Create Vertex Shader
-    GLuint vertShader = createShader("resources/shaders/quadcolor2.vert", GL_VERTEX_SHADER);
-    //2. Create Fragment Shader
-    GLuint fragShader = createShader("resources/shaders/quadcolor2.frag", GL_FRAGMENT_SHADER);
-    //3. Create Program and bind Vertex/Fragm Shader (Pipeline definition)
-    m_prog = createProgram(vertShader, fragShader);
+    program = new GLProgram("resources/shaders/quadcolor2.vert", "resources/shaders/quadcolor2.frag");
 
     //4. Load Vertex data to GPU
     std::vector<float> vertices = {
@@ -127,16 +66,11 @@ void QuadColorDraw2::start() {
     //5. Set Viewport
     glViewport(0, 0, 640, 480);
     glClearColor(0.5f, 0.5f, 0.5f, 1.f);
-    glUseProgram(m_prog);
-
-
-    GLint colorLoc = glGetUniformLocation(m_prog, "color");
-    //glUniform4f(colorLoc, 1.f, 0.f, 0.f, 1.f);
+    program->bind();
 
     color red = {1.f, 0.f, 0.f, 1.f};
-    const GLfloat* redf = (GLfloat*)&red;
-    glUniform4fv(colorLoc, 1, redf);
-
+    program->setUniform("color", red);
+    
     m_elapsedTime = 0.f;
 }
 
@@ -157,11 +91,11 @@ void QuadColorDraw2::update(float deltaTime) {
     glUniform4fv(5, 1, (GLfloat*)&c);
 
 
-    glUniform1f(glGetUniformLocation(m_prog, "data.value1"), 1.f);
-    glUniform1f(glGetUniformLocation(m_prog, "data.value2"), 1.f);
-    glUniform1f(glGetUniformLocation(m_prog, "data.value3"), 1.f);
+    glUniform1f(glGetUniformLocation(program->getId(), "data.value1"), 1.f);
+    glUniform1f(glGetUniformLocation(program->getId(), "data.value2"), 1.f);
+    glUniform1f(glGetUniformLocation(program->getId(), "data.value3"), 1.f);
 
-    printf("Location: %d\n", glGetUniformLocation(m_prog, "data.value3"));
+    printf("Location: %d\n", glGetUniformLocation(program->getId(), "data.value3"));
 }
 
 void QuadColorDraw2::destroy() {
@@ -169,5 +103,5 @@ void QuadColorDraw2::destroy() {
     glDeleteBuffers(1, &m_vbo_vertex);
     glDeleteBuffers(1, &m_vbo_colors);
     glDeleteBuffers(1, &m_ebo);
-    glDeleteProgram(m_prog);
+    delete program;
 }
