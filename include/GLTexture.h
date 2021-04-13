@@ -6,7 +6,8 @@ class GLTexture{
     public:
     GLTexture(const std::string& imgPath);
     ~GLTexture();
-    void bind(GLenum textureUnit);
+    void bind(GLuint textureUnit0based);
+    void bindLegacy(GLenum textureUnitEnum);
 
     private:
     GLuint m_textureId;

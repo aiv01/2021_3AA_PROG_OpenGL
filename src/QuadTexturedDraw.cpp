@@ -107,8 +107,9 @@ void QuadTexturedDraw::start() {
     // glActiveTexture(GL_TEXTURE0);
     // glBindTexture(GL_TEXTURE_2D, smileId);
 
-    m_smileText->bind(GL_TEXTURE0);
-    m_boxText->bind(GL_TEXTURE1);
+    m_smileText->bindLegacy(GL_TEXTURE0);
+    //m_boxText->bindLegacy(GL_TEXTURE1);
+    m_boxText->bind(1);
     //glActiveTexture(GL_TEXTURE1);
     // glActiveTexture(GL_TEXTURE0 + 1);
     // glBindTexture(GL_TEXTURE_2D, boxId);

@@ -44,7 +44,11 @@ GLTexture::~GLTexture(){
     glDeleteTextures(1, &m_textureId);
 }
 
-void GLTexture::bind(GLenum textureUnit){
-    glActiveTexture(textureUnit);
+void GLTexture::bind(GLuint textureUnit0based) {
+    glBindTextureUnit(textureUnit0based, m_textureId);
+}
+
+void GLTexture::bindLegacy(GLenum textureUnitEnum) {
+    glActiveTexture(textureUnitEnum);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
 }
