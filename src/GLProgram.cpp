@@ -97,6 +97,11 @@ void GLProgram::setUniform(const std::string& name, int value) {
     glUniform1i(loc, value);
 }
 
+void GLProgram::setUniform(const std::string& name, float value) {
+    GLint loc = glGetUniformLocation(m_prog, (GLchar*)name.c_str());
+    glUniform1f(loc, value);
+}
+
 GLProgram::~GLProgram(){
     glDeleteProgram(m_prog);
 }

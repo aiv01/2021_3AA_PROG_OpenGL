@@ -1,0 +1,20 @@
+#pragma once
+#include <glad/glad.h>
+#include "GLProgram.h"
+#include "GLTexture.h"
+
+class CubeTexturedDraw {
+public:
+    void start();
+    void update(float deltaTime);
+    void destroy();
+private:
+    GLuint m_vao;
+    GLuint m_vbo_vertex;
+    GLuint m_ebo;
+    GLuint m_prog;
+    GLProgram* program;
+    GLTexture* m_smileText;
+    GLTexture* m_boxText;
+    float m_elapsedTime;
+};
