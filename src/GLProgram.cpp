@@ -101,7 +101,7 @@ GLProgram::~GLProgram(){
     glDeleteProgram(m_prog);
 }
 
-GLProgram* GLProgram::newGLProgram(const std::string& shaderName){
+GLProgram* GLProgram::createByShaderName(const std::string& shaderName){
     std::string vertPath = "resources/shaders/"+shaderName+".vert";
     std::string fragPath = "resources/shaders/"+shaderName+".frag";
     GLProgram* gl_prog = new GLProgram(vertPath, fragPath);

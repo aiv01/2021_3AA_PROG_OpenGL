@@ -14,7 +14,7 @@ class GLProgram
 {
 public:
     GLProgram(const std::string& vertPath,const std::string& fragPath);
-    static GLProgram* newGLProgram(const std::string& shaderName);
+    static GLProgram* createByShaderName(const std::string& shaderName);
     GLuint getId() const;
     void bind() const;
     void setUniform(const std::string& name, const color& c);
