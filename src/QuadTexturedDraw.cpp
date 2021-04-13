@@ -6,41 +6,41 @@
 #include <filesystem>
 #include <iostream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "stb_image.h"
 
 
-static GLuint createTexture(const char* path) {
-    stbi_set_flip_vertically_on_load(true);
-    int width, height, channels;
-    unsigned char* data = stbi_load(path, &width, &height, &channels, 0);
-    DIE_ON_NULL(data, "Failed Loading texture!!!");
-    GLenum format = channels == 3 ? GL_RGB : GL_RGBA;
-    //GLenum format = GL_RGBA;
+// static GLuint createTexture(const char* path) {
+//     stbi_set_flip_vertically_on_load(true);
+//     int width, height, channels;
+//     unsigned char* data = stbi_load(path, &width, &height, &channels, 0);
+//     DIE_ON_NULL(data, "Failed Loading texture!!!");
+//     GLenum format = channels == 3 ? GL_RGB : GL_RGBA;
+//     //GLenum format = GL_RGBA;
     
-    GLuint textureId;
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+//     GLuint textureId;
+//     glGenTextures(1, &textureId);
+//     glBindTexture(GL_TEXTURE_2D, textureId);
     
-    //Load data
-    glTexImage2D(GL_TEXTURE_2D, 0, 
-                    format, width, height, 0, 
-                    format, GL_UNSIGNED_BYTE, data);
-    //Wrapping
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//     //Load data
+//     glTexImage2D(GL_TEXTURE_2D, 0, 
+//                     format, width, height, 0, 
+//                     format, GL_UNSIGNED_BYTE, data);
+//     //Wrapping
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    //Filtering
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//     //Filtering
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    //Optional Mipmappig.
-    glGenerateMipmap(GL_TEXTURE_2D);
+//     //Optional Mipmappig.
+//     glGenerateMipmap(GL_TEXTURE_2D);
 
-    //Destroy texture data
-    stbi_image_free(data);
-    return textureId;
-}
+//     //Destroy texture data
+//     stbi_image_free(data);
+//     return textureId;
+// }
 
 void QuadTexturedDraw::start() {
     program = new GLProgram("resources/shaders/quadtexture.vert", 
@@ -86,8 +86,10 @@ void QuadTexturedDraw::start() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, elemSize, indexes.data(), GL_STATIC_DRAW);
 
     //- Texture
-    GLuint smileId = createTexture("resources/textures/smile.png");
-    GLuint boxId = createTexture("resources/textures/wood-box.jpg");
+    // GLuint smileId = createTexture("resources/textures/smile.png");
+    // GLuint boxId = createTexture("resources/textures/wood-box.jpg");
+    m_smileText = new GLTexture("resources/textures/smile.png");
+    m_boxText = new GLTexture("resources/textures/wood-box.jpg");
 
     //5. Set Viewport
     glViewport(0, 0, 640, 480);
@@ -102,12 +104,14 @@ void QuadTexturedDraw::start() {
     //    layout (binding = 1) uniform sampler2D boxText;
     //program->setUniform("boxText", 1);
     
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, smileId);
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, smileId);
 
+    m_smileText->bind(GL_TEXTURE0);
+    m_boxText->bind(GL_TEXTURE1);
     //glActiveTexture(GL_TEXTURE1);
-    glActiveTexture(GL_TEXTURE0 + 1);
-    glBindTexture(GL_TEXTURE_2D, boxId);
+    // glActiveTexture(GL_TEXTURE0 + 1);
+    // glBindTexture(GL_TEXTURE_2D, boxId);
 
     program->setUniform("selectSmile", false);
 
@@ -127,5 +131,7 @@ void QuadTexturedDraw::destroy() {
     glDeleteVertexArrays(1, &m_vao);
     glDeleteBuffers(1, &m_vbo_vertex);
     glDeleteBuffers(1, &m_ebo);
+    delete m_smileText;
+    delete m_boxText;
     delete program;
 }

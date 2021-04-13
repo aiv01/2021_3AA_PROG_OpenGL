@@ -1,6 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 #include "GLProgram.h"
+#include "GLTexture.h"
 
 class QuadTexturedDraw {
 public:
@@ -13,5 +14,7 @@ private:
     GLuint m_ebo;
     GLuint m_prog;
     GLProgram* program;
+    GLTexture* m_smileText;
+    GLTexture* m_boxText;
     float m_elapsedTime;
 };
