@@ -9,6 +9,8 @@
 #include "QuadPerspDraw.h"
 #include "CubeTexturedDraw.h"
 #include "CubeMvpTexturedDraw.h"
+#include "PhongDraw.h"
+#include "InstancedDraw.h"
 
 // #ifdef _WIN32
 // extern "C" {
@@ -34,7 +36,9 @@ int main()
 	//QuadTexturedDraw currentDraw;
 	//QuadPerspDraw currentDraw;
 	//CubeTexturedDraw currentDraw;
-	CubeMvpTexturedDraw currentDraw;
+	//CubeMvpTexturedDraw currentDraw;
+	//PhongDraw currentDraw;
+	InstancedDraw currentDraw;
 
 	currentDraw.start();
 	while (window->isOpened())
