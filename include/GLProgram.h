@@ -2,6 +2,7 @@
 
 #include <string>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 struct color {
     float r;
@@ -21,6 +22,7 @@ public:
     void setUniform(const std::string& name, bool value);
     void setUniform(const std::string& name, int value);
     void setUniform(const std::string& name, float value);
+    void setUniform(const std::string& name, const glm::mat4& value);
 
     ~GLProgram();
 
