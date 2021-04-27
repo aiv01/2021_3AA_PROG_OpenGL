@@ -13,7 +13,7 @@
 #include "InstancedDraw.h"
 #include "PostFxDraw.h"
 #include "DeferredDraw.h"
-
+#include "CubeMapDraw.h"
 
 // #ifdef _WIN32
 // extern "C" {
@@ -43,7 +43,8 @@ int main()
 	//PhongDraw currentDraw;
 	//InstancedDraw currentDraw;
 	//PostFxDraw currentDraw;
-	DeferredDraw currentDraw;
+	//DeferredDraw currentDraw;
+	CubeMapDraw currentDraw;
 
 	currentDraw.start();
 	while (window->isOpened())
