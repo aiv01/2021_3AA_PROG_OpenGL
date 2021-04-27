@@ -11,6 +11,8 @@
 #include "CubeMvpTexturedDraw.h"
 #include "PhongDraw.h"
 #include "InstancedDraw.h"
+#include "PostFxDraw.h"
+
 
 // #ifdef _WIN32
 // extern "C" {
@@ -38,7 +40,8 @@ int main()
 	//CubeTexturedDraw currentDraw;
 	//CubeMvpTexturedDraw currentDraw;
 	//PhongDraw currentDraw;
-	InstancedDraw currentDraw;
+	//InstancedDraw currentDraw;
+	PostFxDraw currentDraw;
 
 	currentDraw.start();
 	while (window->isOpened())
