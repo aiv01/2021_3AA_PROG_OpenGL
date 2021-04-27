@@ -11,7 +11,7 @@
 
 
 void DeferredDraw::start() {
-    program = GLProgram::createByShaderName("deferredgbuffer");
+    m_sceneProgram = GLProgram::createByShaderName("deferredgbuffer");
 
     wobj* mesh = wobj_from_file("resources/models/stormtrooper.obj");
 
@@ -78,6 +78,7 @@ void DeferredDraw::start() {
     //5. Set Viewport
     glViewport(0, 0, 640, 480);
     //glClearColor(0.5f, 0.5f, 0.5f, 1.f);
+    /*
     program->bind();
 
     glEnable(GL_BLEND);
@@ -91,7 +92,7 @@ void DeferredDraw::start() {
 
 
     m_boxText->bind(1);
-
+    */
     m_elapsedTime = 0.f;
 
     //camera
@@ -103,32 +104,100 @@ void DeferredDraw::start() {
     float zNear = 0.1f;
     float zFar = 100.f;
 
-
-    //model = translate * rotate * scale
-    /*
-    glm::mat4 model = glm::mat4(1.f);
-    model = glm::translate(model, glm::vec3(0.f, 0.f, -5.f));
-    model = glm::rotate(model, glm::radians(45.f), glm::vec3(0.f, 1.f, 0.f));
-    model = glm::scale(model, glm::vec3(2.f));
-    */
-
-    //glm::mat4 modelRotate = glm::rotate(glm::mat4(1.f), glm::radians(45.f), glm::vec3(0.f, 1.f, 0.f));
-
     m_view = glm::lookAt(position, position + direction, up);
     m_projection = glm::perspective(glm::radians(fovY), aspectRatio, zNear, zFar);
 
-    //glm::mat4 mvp = projection * view * model;
-    //program->setUniform("mvp", mvp);
-
-    glm::vec3 pointLightPos = glm::vec3(10.f, 0.f, 0.f);
-    program->setUniform("pointLightPos", pointLightPos);
-    program->setUniform("cameraPos", position);
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
+    int width = 640;
+    int height = 480;
+
+    //G-Buffer (alias Geometry-Buffer)
+    //1. Rendering Scena solito, solo verso il framebuffer intermedio
+    glGenFramebuffers(1, &m_gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+    // Create texture as output for POSITION (ATTACH 0)
+    glGenTextures(1, &m_positionText);
+    glBindTexture(GL_TEXTURE_2D, m_positionText);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_positionText, 0);
+
+    // Create texture as output for NORMALS (ATTACH 1)
+    glGenTextures(1, &m_normalText);
+    glBindTexture(GL_TEXTURE_2D, m_normalText);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_normalText, 0);
+
+    // Create texture as output for DIFFUSE (ATTACH 2)
+    glGenTextures(1, &m_diffuseText);
+    glBindTexture(GL_TEXTURE_2D, m_diffuseText);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_diffuseText, 0);
+    
+    // MRT 
+    GLenum attach[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    glDrawBuffers(3, attach);
+
+    // Create render buffer as output for DEPTH attachement
+    glGenRenderbuffers(1, &m_gBufferRbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_gBufferRbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_gBufferRbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) DIE("Framebuffer not completed!");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+    //Pipeline Rendering
+    m_quadProgram = GLProgram::createByShaderName("deferredquad");
+    std::vector<float> quad = {
+       -1.0f, -1.0f, 0.0f, 0.0f,  //bottom-left
+        1.0f, -1.0f, 1.0f, 0.0f,  //bottom-right
+       -1.0f,  1.0f, 0.0f, 1.0f,  //top-left
+
+       -1.0f,  1.0f, 0.0f, 1.0f,  //top-left
+        1.0f, -1.0f, 1.0f, 0.0f,  //bottom-right
+        1.0f,  1.0f, 1.0f, 1.0f,  //top-right
+    };
+
+    //- Create Vertex Array (VAO)
+    glGenVertexArrays(1, &m_quadVao);
+    glBindVertexArray(m_quadVao);
+
+    //- Create Buffer to load vertex data (VBO)
+    glGenBuffers(1, &m_quadVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_quadVbo);
+    glBufferData(GL_ARRAY_BUFFER, quad.size() * sizeof(float), quad.data(), GL_STATIC_DRAW);
+
+    //- VAO link VBO to Vertex Shader
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2 *sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+
+    //glm::vec3 pointLightPos = glm::vec3(10.f, 0.f, 0.f);
+    m_quadProgram->bind();
+    m_quadProgram->setUniform("pointLightPos[0]", glm::vec3(4.f, 0.f, 0.f));
+    m_quadProgram->setUniform("pointLightPos[1]", glm::vec3(-4.f, 0.f, 0.f));
+
+    m_quadProgram->setUniform("cameraPos", position);
+    m_quadProgram->setUniform("gPosition", 0);
+    m_quadProgram->setUniform("gNormal", 1);
+    m_quadProgram->setUniform("gDiffuse", 2);
 }
 
 void DeferredDraw::update(float deltaTime) {
-    //6. Draw Call
+    //1. Render scene to G-Buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+    glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    
     m_elapsedTime += deltaTime;
@@ -140,10 +209,49 @@ void DeferredDraw::update(float deltaTime) {
     model = glm::scale(model, glm::vec3(2.5f));
 
     glm::mat4 mvp = m_projection * m_view * model;
-    program->setUniform("mvp", mvp);
-    program->setUniform("model", model);
-
+    m_sceneProgram->bind();
+    m_sceneProgram->setUniform("mvp", mvp);
+    m_sceneProgram->setUniform("model", model);
+    m_boxText->bind(0);
+    m_sceneProgram->setUniform("diffuseText", 0);
+    glBindVertexArray(m_vao);
     glDrawArrays(GL_TRIANGLES, 0, m_vertices.size() / 8);
+    
+    
+    model = glm::mat4(1.f);
+    model = glm::translate(model, glm::vec3(1.f, -4.2f, -8.f));
+    model = glm::scale(model, glm::vec3(2.5f));
+    mvp = m_projection * m_view * model;
+    
+    m_sceneProgram->setUniform("mvp", mvp);
+    m_sceneProgram->setUniform("model", model);
+    glDrawArrays(GL_TRIANGLES, 0, m_vertices.size() / 8);
+
+    ///////// READ
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glDisable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    /*
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_gBuffer);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glBlitFramebuffer(0, 0, 640, 480, 0, 240, 320, 480, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_gBuffer);
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    glBlitFramebuffer(0, 0, 640, 480, 320, 240, 640, 480, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_gBuffer);
+    glReadBuffer(GL_COLOR_ATTACHMENT2);
+    glBlitFramebuffer(0, 0, 640, 480, 0, 0, 320, 240, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    */
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_gBuffer);
+    m_quadProgram->bind();
+    glBindVertexArray(m_quadVao);
+    glBindTextureUnit(0, m_positionText);
+    glBindTextureUnit(1, m_normalText);
+    glBindTextureUnit(2, m_diffuseText);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void DeferredDraw::destroy() {
@@ -152,5 +260,5 @@ void DeferredDraw::destroy() {
     glDeleteBuffers(1, &m_ebo);
     delete m_smileText;
     delete m_boxText;
-    delete program;
+    delete m_sceneProgram;
 }
