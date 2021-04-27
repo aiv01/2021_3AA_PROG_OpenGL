@@ -127,42 +127,25 @@ void CubeMapDraw::start() {
     m_texture->bind(0);
     program->bind();
     program->setUniform("cubemap", 0);
-
-
-    m_cubeProgram = GLProgram::createByShaderName("cubemapobj");
-    glEnable(GL_DEPTH_TEST);
 }
 
 void CubeMapDraw::update(float deltaTime) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_CULL_FACE);
-    glDepthMask(GL_FALSE);
+    
 
     m_elapsedTime += deltaTime;
     float angle = 20.f * m_elapsedTime;
 
     glm::mat4 model = glm::mat4(1.f);
+    //model = glm::rotate(model, glm::radians(angle), glm::vec3(0.f, 1.f, 0.f));
+    //model = glm::scale(model, glm::vec3(2.f));
     glm::mat4 cubeMapView = glm::rotate(m_view, glm::radians(angle), glm::vec3(0.f, 1.f, 0.f));
+    //cubeMapView = glm::rotate(cubeMapView, glm::radians(angle), glm::vec3(0.f, 0.f, 1.f));
     cubeMapView = glm::mat3(cubeMapView);
     glm::mat4 mvp = m_projection * cubeMapView * model;
-    program->bind();
+    //glm::mat4 mvp = glm::mat4(1.f);
     program->setUniform("mvp", mvp);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
 
-
-    //DRAW CUBE
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW); 
-    glDepthMask(GL_TRUE);   
-
-    glm::mat4 cubeModel = glm::mat4(1.f);
-    cubeModel = glm::translate(cubeModel, glm::vec3(0.f, 0.f, -10.f));
-    cubeModel = glm::scale(cubeModel, glm::vec3(2.f));
-
-    mvp = m_projection * m_view * cubeModel;
-    m_cubeProgram->bind();
-    m_cubeProgram->setUniform("mvp", mvp);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 

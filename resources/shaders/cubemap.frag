@@ -1,12 +1,12 @@
 #version 450 core
 out vec4 fragColor;
 
-in vec2 vert_uv;
+in vec3 vert_uv;
 
-uniform sampler2D smileText;
-layout (binding = 1) uniform sampler2D boxText;
+uniform samplerCube cubemap;
 
 void main() {
-    vec4 color = texture(boxText, vert_uv);
-    fragColor = color;
+    vec3 uv = vert_uv;
+    uv.z *= -1.f;
+    fragColor = texture(cubemap, uv);
 }

@@ -3,9 +3,7 @@ layout (location = 0) in vec3 aPos;
 
 uniform mat4 mvp;
 
-out vec3 vert_uv;
-
 void main() {
-    gl_Position = mvp * vec4(aPos, 1.0);  
-    vert_uv = aPos;
+    vec4 pos = mvp * vec4(aPos, 1.f);
+    gl_Position = pos;
 }
